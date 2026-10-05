@@ -1,0 +1,39 @@
+// Prisma Schema for Recruitment Application
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Application {
+  id                    String    @id @default(uuid()) @db.Uuid
+  fullName              String    @map("full_name") @db.VarChar(255)
+  cccd                  String    @unique @db.VarChar(12)
+  cccdIssueDate         DateTime  @map("cccd_issue_date") @db.Date
+  avatarUrl             String?   @map("avatar_url") @db.Text
+  avatarPublicId        String?   @map("avatar_public_id") @db.Text
+
+  bachelorMajor         String    @map("bachelor_major") @db.VarChar(255)
+  bachelorIssueDate     DateTime  @map("bachelor_issue_date") @db.Date
+  bachelorSerialNumber  String    @map("bachelor_serial_number") @db.VarChar(100)
+  bachelorFileUrl       String    @map("bachelor_file_url") @db.Text
+  bachelorFilePublicId String    @map("bachelor_file_public_id") @db.Text
+
+  masterMajor           String    @map("master_major") @db.VarChar(255)
+  masterIssueDate       DateTime  @map("master_issue_date") @db.Date
+  masterSerialNumber    String    @map("master_serial_number") @db.VarChar(100)
+  masterFileUrl         String    @map("master_file_url") @db.Text
+  masterFilePublicId   String    @map("master_file_public_id") @db.Text
+
+  summaryPdfUrl         String    @map("summary_pdf_url") @db.Text
+  summaryPdfPublicId   String    @map("summary_pdf_public_id") @db.Text
+
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([createdAt(sort: Desc)], map: "idx_applications_created_at")
+  @@index([fullName], map: "idx_applications_full_name")
+  @@map("applications")
+}
