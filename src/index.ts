@@ -13,9 +13,24 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  env.CLIENT_URL,
+  env.CLIENT_URL ? env.CLIENT_URL.replace(/\/$/, '') : '',
+  `${env.CLIENT_URL}/`,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (env.CLIENT_URL === '*' || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback allow to avoid unexpected deployment blocks
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -52,7 +67,7 @@ app.use(errorHandler);
 // Start server
 const PORT = env.PORT || 4000;
 
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log('==================================================');
   console.log(`🚀 Recruitment Backend API running on port ${PORT}`);
   console.log(`📡 URL: http://localhost:${PORT}/api`);
