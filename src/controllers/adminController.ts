@@ -192,7 +192,7 @@ export const exportApplicationsExcel = async (
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
       now.getDate()
     ).padStart(2, '0')}`;
-    const filename = `applications-${dateStr}.xlsx`;
+    const filename = `HoSoUngTuyen-${dateStr}.xlsx`;
 
     res.setHeader(
       'Content-Type',
