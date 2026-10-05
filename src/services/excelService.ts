@@ -48,7 +48,7 @@ export const streamExcelApplications = async (
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Danh sách ứng viên');
 
-  // Define columns
+  // Định nghĩa các cột
   worksheet.columns = [
     { header: 'STT', key: 'stt', width: 8 },
     { header: 'Ảnh chân dung', key: 'avatarUrl', width: 18 },
@@ -67,7 +67,7 @@ export const streamExcelApplications = async (
     { header: 'Ngày nộp hồ sơ', key: 'createdAt', width: 20 },
   ];
 
-  // Header style: Bold, navy background, white text, centered
+  // Định dạng tiêu đề: In đậm, nền xanh navy, chữ trắng, căn giữa
   const headerRow = worksheet.getRow(1);
   headerRow.height = 30;
   headerRow.eachCell((cell) => {
@@ -75,7 +75,7 @@ export const streamExcelApplications = async (
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1E3A8A' }, // Slate/Navy
+      fgColor: { argb: 'FF1E3A8A' }, // Màu xanh Slate/Navy
     };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
     cell.border = {
@@ -86,7 +86,7 @@ export const streamExcelApplications = async (
     };
   });
 
-  // Populate rows
+  // Điền dữ liệu các hàng
   rows.forEach((item, index) => {
     const row = worksheet.addRow({
       stt: index + 1,
@@ -104,7 +104,7 @@ export const streamExcelApplications = async (
 
     row.height = 24;
 
-    // Center alignment for specific columns
+    // Căn giữa cho các cột cụ thể
     row.getCell('stt').alignment = { vertical: 'middle', horizontal: 'center' };
     row.getCell('cccd').alignment = { vertical: 'middle', horizontal: 'center' };
     row.getCell('cccdIssueDate').alignment = { vertical: 'middle', horizontal: 'center' };
@@ -112,7 +112,7 @@ export const streamExcelApplications = async (
     row.getCell('masterIssueDate').alignment = { vertical: 'middle', horizontal: 'center' };
     row.getCell('createdAt').alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // Avatar link
+    // Liên kết ảnh chân dung
     const avatarCell = row.getCell('avatarUrl');
     if (item.avatarUrl) {
       avatarCell.value = {
@@ -126,7 +126,7 @@ export const streamExcelApplications = async (
     }
     avatarCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // Clickable hyperlinks for PDF columns
+    // Siêu liên kết có thể nhấp cho các cột tệp PDF
     const bachelorCell = row.getCell('bachelorFileUrl');
     bachelorCell.value = {
       text: 'Xem bằng ĐH (PDF)',
@@ -151,7 +151,7 @@ export const streamExcelApplications = async (
     summaryCell.font = { color: { argb: 'FF2563EB' }, underline: true };
     summaryCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // Light zebra striping
+    // Hiệu ứng màu xen kẽ nhẹ giữa các dòng (zebra striping)
     if (index % 2 === 1) {
       row.eachCell({ includeEmpty: true }, (cell) => {
         cell.fill = {
@@ -162,7 +162,7 @@ export const streamExcelApplications = async (
       });
     }
 
-    // Border for all data cells
+    // Kẻ viền cho tất cả các ô dữ liệu
     row.eachCell({ includeEmpty: true }, (cell) => {
       cell.border = {
         top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
@@ -173,6 +173,6 @@ export const streamExcelApplications = async (
     });
   });
 
-  // Stream output to HTTP response
+  // Xuất luồng dữ liệu (stream) ra phản hồi HTTP
   await workbook.xlsx.write(res);
 };

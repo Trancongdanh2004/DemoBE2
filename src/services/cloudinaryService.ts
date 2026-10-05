@@ -8,7 +8,7 @@ export interface UploadResult {
 }
 
 /**
- * Uploads a buffer to Cloudinary using upload_stream
+ * Tải một buffer lên Cloudinary bằng upload_stream
  */
 export const uploadToCloudinary = (
   buffer: Buffer,
@@ -42,14 +42,14 @@ export const uploadToCloudinary = (
 };
 
 /**
- * Deletes an asset from Cloudinary
+ * Xóa một tài nguyên (asset) khỏi Cloudinary
  */
 export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
   try {
-    // Try destroying as image first (most PDFs via auto are image)
+    // Thử xóa dưới dạng image trước (phần lớn PDF tải lên dạng auto được lưu là image)
     const res = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
     if (res.result !== 'ok') {
-      // Try raw if image was not found
+      // Thử xóa dưới dạng raw nếu không tìm thấy dạng image
       await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
     }
   } catch (err) {

@@ -1,4 +1,4 @@
-// Prisma Schema for Recruitment Application
+// Lược đồ Prisma (Schema) cho Hệ thống Tuyển dụng
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

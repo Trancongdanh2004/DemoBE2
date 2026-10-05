@@ -35,7 +35,7 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // Handle generic error
+  // Xử lý các lỗi chung khác
   const statusCode = err.status || err.statusCode || 500;
   const message = err.message || 'Đã có lỗi xảy ra trên hệ thống. Vui lòng thử lại sau.';
 

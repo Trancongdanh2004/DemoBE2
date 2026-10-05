@@ -5,7 +5,7 @@ import { submitApplication } from '../controllers/applicationController';
 
 const router = Router();
 
-// Stricter rate limit on submissions: max 20 requests per 15 minutes per IP
+// Giới hạn tần suất nộp hồ sơ chặt chẽ hơn: tối đa 20 yêu cầu mỗi 15 phút trên mỗi IP
 const submitLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,

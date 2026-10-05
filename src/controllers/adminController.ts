@@ -70,7 +70,7 @@ export const getApplications = async (
         }
       : {};
 
-    // Count total records and fetch paginated items
+    // Đếm tổng số bản ghi và lấy danh sách theo phân trang
     const [total, applications] = await Promise.all([
       prisma.application.count({ where: whereClause }),
       prisma.application.findMany({
@@ -140,12 +140,12 @@ export const deleteApplication = async (
       return;
     }
 
-    // Delete record from DB using Prisma
+    // Xóa bản ghi khỏi cơ sở dữ liệu bằng Prisma
     await prisma.application.delete({
       where: { id },
     });
 
-    // Clean up files in Cloudinary in background
+    // Dọn dẹp các tệp trên Cloudinary ở chế độ nền (background)
     const deleteTasks: Promise<void>[] = [
       deleteFromCloudinary(application.bachelorFilePublicId),
       deleteFromCloudinary(application.masterFilePublicId),

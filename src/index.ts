@@ -9,10 +9,10 @@ import { errorHandler } from './middlewares/errorHandler';
 
 const app = express();
 
-// Security headers
+// Cấu hình các tiêu đề bảo mật (Security headers)
 app.use(helmet());
 
-// CORS configuration
+// Cấu hình chia sẻ tài nguyên nguồn gốc chéo (CORS)
 const allowedOrigins = [
   env.CLIENT_URL,
   env.CLIENT_URL ? env.CLIENT_URL.replace(/\/$/, '') : '',
@@ -24,12 +24,12 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      // Cho phép các yêu cầu không có origin (như ứng dụng di động, cURL, server-to-server)
       if (!origin) return callback(null, true);
       if (env.CLIENT_URL === '*' || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
         return callback(null, true);
       }
-      return callback(null, true); // Fallback allow to avoid unexpected deployment blocks
+      return callback(null, true); // Cơ chế dự phòng cho phép để tránh bị chặn khi triển khai
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -37,11 +37,11 @@ app.use(
   })
 );
 
-// Body parsers
+// Phân tích cú pháp phần thân yêu cầu (Body parsers)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// Kiểm tra trạng thái hoạt động (Health check)
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -52,19 +52,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Main Routes
+// Các tuyến đường chính (Main Routes)
 app.use('/api/applications', applicationRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 404 handler
+// Xử lý khi không tìm thấy đường dẫn (404 handler)
 app.use((req, res) => {
   res.status(404).json({ message: `Đường dẫn ${req.method} ${req.originalUrl} không tồn tại trên hệ thống.` });
 });
 
-// Centralized error handler
+// Bộ xử lý lỗi tập trung
 app.use(errorHandler);
 
-// Start server
+// Khởi động máy chủ
 const PORT = env.PORT || 4000;
 
 app.listen(PORT, '0.0.0.0', async () => {
@@ -75,7 +75,7 @@ app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🗄️  Database ORM: Prisma + PostgreSQL (Neon)`);
   console.log('==================================================');
 
-  // Verify DB connection
+  // Kiểm tra kết nối cơ sở dữ liệu
   if (!env.DATABASE_URL) {
     console.warn('⚠️  DATABASE_URL chưa được thiết lập trong BE/.env.');
     console.warn('👉 Hãy cấu hình Neon DATABASE_URL và chạy `npm run db:push`');
@@ -88,7 +88,7 @@ app.listen(PORT, '0.0.0.0', async () => {
     }
   }
 
-  // Check Cloudinary
+  // Kiểm tra cấu hình Cloudinary
   if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
     console.warn('⚠️  Cấu hình Cloudinary chưa đầy đủ trong BE/.env.');
   } else {

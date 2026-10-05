@@ -12,7 +12,7 @@ import {
 
 const router = Router();
 
-// Rate limiter for admin login to prevent brute force
+// Giới hạn tần suất đăng nhập của admin để phòng chống tấn công brute-force
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -23,10 +23,10 @@ const loginLimiter = rateLimit({
   },
 });
 
-// Public admin routes
+// Các tuyến đường (routes) công khai dành cho admin
 router.post('/login', loginLimiter, adminLogin);
 
-// Protected admin routes
+// Các tuyến đường (routes) cần xác thực quyền admin
 router.use(authenticateAdmin);
 
 router.get('/me', getAdminMe);

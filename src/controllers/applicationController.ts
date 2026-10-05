@@ -7,7 +7,7 @@ import { prisma } from '../config/prisma';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-// Submission zod schema
+// Schema Zod xác thực dữ liệu nộp hồ sơ
 export const applicationSchema = z.object({
   fullName: z
     .string({ required_error: 'Họ và tên là bắt buộc.' })
@@ -79,11 +79,11 @@ export const submitApplication = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  // Track uploaded assets for rollback
+  // Theo dõi các tệp đã tải lên để hoàn tác (rollback) nếu có lỗi
   const uploadedPublicIds: string[] = [];
 
   try {
-    // 1. Validate files presence
+    // 1. Kiểm tra sự tồn tại của các tệp bắt buộc
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const avatarFile = files?.['avatarFile']?.[0];
     const bachelorFile = files?.['bachelorFile']?.[0];
@@ -98,7 +98,7 @@ export const submitApplication = async (
       return;
     }
 
-    // 2. Validate file signatures (magic bytes)
+    // 2. Kiểm tra chữ ký tệp (magic bytes) để đảm bảo định dạng hợp lệ
     if (avatarFile && !isValidImageBuffer(avatarFile.buffer)) {
       res.status(400).json({
         message: 'Ảnh chân dung không phải là tệp ảnh hợp lệ (chỉ hỗ trợ JPG, PNG, WEBP).',
@@ -118,10 +118,10 @@ export const submitApplication = async (
       return;
     }
 
-    // 3. Validate form data with Zod
+    // 3. Xác thực dữ liệu biểu mẫu với Zod
     const validatedData = applicationSchema.parse(req.body);
 
-    // 4. Check duplicate CCCD via Prisma
+    // 4. Kiểm tra trùng lặp số CCCD qua Prisma
     const existingApp = await prisma.application.findUnique({
       where: { cccd: validatedData.cccd },
     });
@@ -133,7 +133,7 @@ export const submitApplication = async (
       return;
     }
 
-    // 5. Upload avatar to Cloudinary if provided
+    // 5. Tải ảnh chân dung lên Cloudinary nếu có
     let avatarUrl: string | undefined;
     let avatarPublicId: string | undefined;
 
@@ -147,21 +147,21 @@ export const submitApplication = async (
       uploadedPublicIds.push(avatarUpload.public_id);
     }
 
-    // 6. Upload bachelor degree to Cloudinary
+    // 6. Tải tệp bằng đại học lên Cloudinary
     const bachelorUpload = await uploadToCloudinary(
       bachelorFile.buffer,
       'recruitment/degrees'
     );
     uploadedPublicIds.push(bachelorUpload.public_id);
 
-    // 7. Upload master degree to Cloudinary
+    // 7. Tải tệp bằng thạc sĩ lên Cloudinary
     const masterUpload = await uploadToCloudinary(
       masterFile.buffer,
       'recruitment/degrees'
     );
     uploadedPublicIds.push(masterUpload.public_id);
 
-    // 8. Generate Summary PDF (with embedded avatar if available)
+    // 8. Tạo tệp PDF tổng hợp (nhúng ảnh chân dung nếu có)
     const now = new Date();
     const formattedSubmittedAt = `${String(now.getDate()).padStart(2, '0')}/${String(
       now.getMonth() + 1
@@ -195,14 +195,14 @@ export const submitApplication = async (
       submittedAt: formattedSubmittedAt,
     });
 
-    // 9. Upload Summary PDF to Cloudinary
+    // 9. Tải tệp PDF tổng hợp lên Cloudinary
     const summaryUpload = await uploadToCloudinary(
       summaryPdfBuffer,
       'recruitment/summaries'
     );
     uploadedPublicIds.push(summaryUpload.public_id);
 
-    // 10. Insert record into PostgreSQL using Prisma
+    // 10. Thêm bản ghi vào PostgreSQL qua Prisma
     const createdRecord = await prisma.application.create({
       data: {
         fullName: validatedData.fullName,
@@ -225,14 +225,14 @@ export const submitApplication = async (
       },
     });
 
-    // Success response
+    // Phản hồi kết quả thành công
     res.status(201).json({
       message: 'Nộp hồ sơ ứng tuyển thành công!',
       id: createdRecord.id,
       summaryPdfUrl: createdRecord.summaryPdfUrl,
     });
   } catch (error) {
-    // Rollback uploaded Cloudinary files if any failure occurred
+    // Hoàn tác (xóa) các tệp đã tải lên Cloudinary nếu xảy ra lỗi
     if (uploadedPublicIds.length > 0) {
       console.warn('⚠️ Rolling back uploaded Cloudinary assets due to error:', uploadedPublicIds);
       await Promise.allSettled(

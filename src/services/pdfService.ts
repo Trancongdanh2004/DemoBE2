@@ -23,7 +23,7 @@ export interface SummaryPdfData {
 }
 
 /**
- * Adds a clickable URI annotation to a pdf-lib page
+ * Thêm chú thích liên kết URL có thể nhấp vào trang pdf-lib
  */
 const addLinkAnnotation = (
   pdfDoc: PDFDocument,
@@ -56,7 +56,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
-  // Load fonts supporting Vietnamese
+  // Tải font chữ hỗ trợ tiếng Việt
   const fontDir = path.resolve(__dirname, '../../assets/fonts');
   const regularFontPath = path.join(fontDir, 'Roboto-Regular.ttf');
   const boldFontPath = path.join(fontDir, 'Roboto-Bold.ttf');
@@ -67,21 +67,21 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
   const fontRegular = await pdfDoc.embedFont(regularFontBytes);
   const fontBold = await pdfDoc.embedFont(boldFontBytes);
 
-  // A4 size: 595.28 x 841.89 points
+  // Kích thước chuẩn khổ A4: 595.28 x 841.89 điểm (points)
   const page = pdfDoc.addPage([595.28, 841.89]);
   const { width, height } = page.getSize();
 
-  const primaryColor = rgb(0.08, 0.25, 0.45); // Deep navy blue
-  const secondaryColor = rgb(0.2, 0.2, 0.2); // Dark slate
-  const lightBgColor = rgb(0.94, 0.96, 0.98); // Light soft blue-gray
-  const linkColor = rgb(0.1, 0.4, 0.85); // Blue for links
+  const primaryColor = rgb(0.08, 0.25, 0.45); // Xanh navy đậm
+  const secondaryColor = rgb(0.2, 0.2, 0.2); // Xám đen slate
+  const lightBgColor = rgb(0.94, 0.96, 0.98); // Nền xám xanh nhạt
+  const linkColor = rgb(0.1, 0.4, 0.85); // Xanh dương cho liên kết
   const borderColor = rgb(0.85, 0.88, 0.92);
 
   const margin = 50;
   const contentWidth = width - margin * 2;
   let currentY = height - 55;
 
-  // Header Title
+  // Tiêu đề đầu trang
   const titleText = 'HỒ SƠ ỨNG TUYỂN';
   const titleWidth = fontBold.widthOfTextAtSize(titleText, 20);
   page.drawText(titleText, {
@@ -104,7 +104,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
   });
 
   currentY -= 15;
-  // Header divider
+  // Đường kẻ phân cách tiêu đề
   page.drawLine({
     start: { x: margin, y: currentY },
     end: { x: width - margin, y: currentY },
@@ -114,9 +114,9 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
 
   currentY -= 30;
 
-  // Helper for rendering section header
+  // Hàm hỗ trợ vẽ tiêu đề từng phần
   const drawSectionHeader = (title: string) => {
-    // Background bar
+    // Thanh nền
     page.drawRectangle({
       x: margin,
       y: currentY - 5,
@@ -138,7 +138,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
     currentY -= 30;
   };
 
-  // Helper for rendering label-value row
+  // Hàm hỗ trợ vẽ dòng nhãn - giá trị
   const drawRow = (label: string, value: string) => {
     const labelX = margin + 15;
     const valueX = margin + 180;
@@ -162,7 +162,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
     currentY -= 22;
   };
 
-  // Helper for rendering link row
+  // Hàm hỗ trợ vẽ dòng liên kết
   const drawLinkRow = (label: string, linkText: string, url: string) => {
     const labelX = margin + 15;
     const valueX = margin + 180;
@@ -186,7 +186,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
       color: linkColor,
     });
 
-    // Underline
+    // Gạch chân liên kết
     page.drawLine({
       start: { x: valueX, y: currentY - 2 },
       end: { x: valueX + textWidth, y: currentY - 2 },
@@ -194,7 +194,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
       color: linkColor,
     });
 
-    // Clickable link annotation box
+    // Hộp chú thích liên kết có thể nhấp
     const annotRect: [number, number, number, number] = [
       valueX,
       currentY - 3,
@@ -206,25 +206,25 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
     currentY -= 24;
   };
 
-  // Embed Candidate Avatar if available
+  // Nhúng ảnh chân dung của ứng viên nếu có
   let embeddedAvatarImage: any = null;
   if (data.avatarBuffer) {
     try {
       if (data.avatarMimeType?.includes('png')) {
         embeddedAvatarImage = await pdfDoc.embedPng(data.avatarBuffer);
       } else {
-        // Embed JPG
+        // Nhúng ảnh JPG
         embeddedAvatarImage = await pdfDoc.embedJpg(data.avatarBuffer);
       }
     } catch (e) {
-      // Fallback: if format wasn't standard JPG/PNG, try embedJpg/embedPng interchangeably
+      // Phương án dự phòng: nếu định dạng không phải JPG/PNG chuẩn, thử thay thế giữa embedJpg và embedPng
       try {
         embeddedAvatarImage = await pdfDoc.embedPng(data.avatarBuffer);
       } catch {}
     }
   }
 
-  // 1. Personal Info Section
+  // 1. Phần thông tin cá nhân
   drawSectionHeader('1. Thông tin cá nhân');
   const personalStartY = currentY;
 
@@ -235,7 +235,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
     drawLinkRow('Ảnh chân dung:', 'Xem ảnh gốc', data.avatarUrl);
   }
 
-  // Draw Avatar frame on the right side if available
+  // Vẽ khung ảnh chân dung ở bên phải nếu có
   if (embeddedAvatarImage) {
     const photoW = 75;
     const photoH = 100;
@@ -249,7 +249,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
       height: photoH,
     });
 
-    // Photo border
+    // Viền khung ảnh
     page.drawRectangle({
       x: photoX,
       y: photoY,
@@ -259,7 +259,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
       borderWidth: 1.5,
     });
 
-    // Caption below photo
+    // Chú thích dưới ảnh
     const caption = 'Ảnh chân dung';
     const capWidth = fontRegular.widthOfTextAtSize(caption, 8);
     page.drawText(caption, {
@@ -273,7 +273,7 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
 
   currentY -= 15;
 
-  // 2. Bachelor's Degree Section
+  // 2. Phần bằng tốt nghiệp đại học
   drawSectionHeader('2. Bằng tốt nghiệp đại học');
   drawRow('Chuyên ngành:', data.bachelorMajor);
   drawRow('Ngày cấp bằng:', data.bachelorIssueDate);
@@ -282,14 +282,14 @@ export const generateSummaryPdf = async (data: SummaryPdfData): Promise<Buffer> 
 
   currentY -= 15;
 
-  // 3. Master's Degree Section
+  // 3. Phần bằng tốt nghiệp thạc sĩ
   drawSectionHeader('3. Bằng tốt nghiệp thạc sĩ');
   drawRow('Chuyên ngành:', data.masterMajor);
   drawRow('Ngày cấp bằng:', data.masterIssueDate);
   drawRow('Số hiệu bằng tốt nghiệp:', data.masterSerialNumber);
   drawLinkRow('Tệp bằng đính kèm:', 'Tệp PDF Bằng Thạc sĩ', data.masterFileUrl);
 
-  // Footer note
+  // Ghi chú chân trang (footer)
   const footerY = 45;
   page.drawLine({
     start: { x: margin, y: footerY + 20 },
